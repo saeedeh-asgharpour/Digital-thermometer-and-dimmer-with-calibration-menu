@@ -1,9 +1,12 @@
 #include <Arduino.h>
 #include <stdint.h>
 #include <SPI.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
 #include <Adafruit_ILI9341.h>
 #include <logo.h>
-#include <TimerOne.h> // Use the TimerOne Library to attach an interrupt
+#include <TimerOne.h>
+#include <Adafruit_MAX31865.h>
 
 // LCD
 #define TFT_DC 9
@@ -30,7 +33,6 @@ const int En = 7;
 int RunButtonState;
 
 // max31865
-#include <Adafruit_MAX31865.h>
 
 // Use software SPI: CS, DI, DO, CLK
 Adafruit_MAX31865 thermo = Adafruit_MAX31865(10, 11, 12, 13);
@@ -43,7 +45,7 @@ Adafruit_MAX31865 thermo = Adafruit_MAX31865(10, 11, 12, 13);
 
 void setup()
 {
-  // FAN
+  // fan
   pinMode(RunButton, INPUT);
   pinMode(En, OUTPUT);
 
@@ -54,63 +56,16 @@ void setup()
   attachInterrupt(0, zero_cross_detect, RISING); // Attach an Interupt to Pin 2 (interupt 0) for Zero Cross Detection
   Timer1.initialize(freqStep);                   // Initialize TimerOne library for the freq we need
   Timer1.attachInterrupt(dim_check, freqStep);   // Go to dim_check procedure every 75 uS (50Hz)  or 65 uS (60Hz)
-
+                                                 // Use the TimerOne Library to attach an interrupt
   Serial.begin(9600);
   SPSR |= (1 << SPI2X); // 2x SPI speed
 
   // max31865
-  thermo.begin(MAX31865_3WIRE); // set to 2WIRE or 4WIRE as necessary
+  thermo.begin(MAX31865_4WIRE); // set to 2WIRE or 3WIRE as necessary
 
   // LCD
   tft.begin();
   tft.fillScreen(ILI9341_BLACK);
-
-  // Display logo
-  tft.drawRGBBitmap(
-      100,
-      100,
-#if defined(__AVR__)
-      logoBitmap,
-#else
-      // Some non-AVR MCU's have a "flat" memory model and don't
-      // distinguish between flash and RAM addresses.  In this case,
-      // the RAM-resident-optimized drawRGBBitmap in the ILI9341
-      // library can be invoked by forcibly type-converting the
-      // PROGMEM bitmap pointer to a non-const uint16_t *.
-      (uint16_t *)logoBitmap,
-#endif
-      LOGO_WIDTH, LOGO_HEIGHT);
-
-  delay(1000);
-
-  // Display pt100 temp
-  uint16_t rtd = thermo.readRTD();
-  Serial.print("RTD value: ");
-  Serial.println(rtd);
-  tft.print("RTD value: ");
-  tft.println(rtd);
-
-  float ratio = rtd;
-  ratio /= 32768;
-  tft.print("Ratio = ");
-  tft.println(ratio, 8);
-  tft.print("Resistance = ");
-  tft.println(RREF * ratio, 8);
-  tft.print("Temperature = ");
-  tft.println(thermo.temperature(RNOMINAL, RREF));
-
-  // Check and print any faults
-  uint8_t fault = thermo.readFault();
-  if (fault)
-  {
-    if (fault & MAX31865_FAULT_OVUV)
-    {
-      tft.println("Under/Over voltage");
-    }
-    thermo.clearFault();
-  }
-  tft.println();
-  delay(1000);
 }
 
 // dimmer
@@ -198,4 +153,76 @@ void loop()
     digitalWrite(En, HIGH);
     delay(300000);
   }
+
+  // Display logo
+  tft.drawRGBBitmap(
+      100,
+      100,
+#if defined(__AVR__)
+      logoBitmap,
+#else
+      // Some non-AVR MCU's have a "flat" memory model and don't
+      // distinguish between flash and RAM addresses.  In this case,
+      // the RAM-resident-optimized drawRGBBitmap in the ILI9341
+      // library can be invoked by forcibly type-converting the
+      // PROGMEM bitmap pointer to a non-const uint16_t *.
+      (uint16_t *)logoBitmap,
+#endif
+      LOGO_WIDTH, LOGO_HEIGHT);
+
+  delay(1000);
+
+  // Display pt100 temp
+
+  /* uint16_t rtd = thermo.readRTD();
+   tft.print("RTD value: ");
+   tft.println(rtd);
+   float ratio = rtd;
+   ratio /= 32768;
+   tft.print("Ratio = ");
+   tft.println(ratio, 8);
+   tft.print("Resistance = ");
+   tft.println(RREF*ratio, 8);*/
+  tft.setTextColor(ILI9341_WHITE);
+  tft.setTextSize(2);
+  tft.println("Temperature = ");
+  tft.setTextColor(ILI9341_WHITE);
+  tft.setTextSize(3);
+  tft.println(thermo.temperature(RNOMINAL, RREF));
+
+  // Check and print any faults
+  /*uint8_t fault = thermo.readFault();
+  if (fault)
+  {
+      tft.setTextColor(ILI9341_WHITE); tft.setTextSize(1);
+    tft.print("Fault 0x");
+    tft.println(fault, HEX);
+    if (fault & MAX31865_FAULT_HIGHTHRESH)
+    {
+      tft.println("RTD High Threshold");
+    }
+    if (fault & MAX31865_FAULT_LOWTHRESH)
+    {
+      tft.println("RTD Low Threshold");
+    }
+    if (fault & MAX31865_FAULT_REFINLOW)
+    {
+      tft.println("REFIN- > 0.85 x Bias");
+    }
+    if (fault & MAX31865_FAULT_REFINHIGH)
+    {
+      tft.println("REFIN- < 0.85 x Bias - FORCE- open");
+    }
+    if (fault & MAX31865_FAULT_RTDINLOW)
+    {
+      tft.println("RTDIN- < 0.85 x Bias - FORCE- open");
+    }
+    if (fault & MAX31865_FAULT_OVUV)
+    {
+      tft.println("Under/Over voltage");
+    }
+    thermo.clearFault();
+  }*/
+  tft.println();
+  delay(1000);
 }
