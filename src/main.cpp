@@ -55,7 +55,7 @@ void setup()
   pinMode(AC_pin, OUTPUT);                       // Set the Triac pin as output
   attachInterrupt(0, zero_cross_detect, RISING); // Attach an Interupt to Pin 2 (interupt 0) for Zero Cross Detection
   Timer1.initialize(freqStep);                   // Initialize TimerOne library for the freq we need
-  Timer1.attachInterrupt(dim_check, freqStep);   // Go to dim_check procedure every 75 uS (50Hz)  or 65 uS (60Hz)
+  Timer1.attachInterrupt(dim_check, freqStep);   // Go to dim_check procedure every 75 uS (50Hz)
                                                  // Use the TimerOne Library to attach an interrupt
   Serial.begin(9600);
   SPSR |= (1 << SPI2X); // 2x SPI speed
@@ -65,6 +65,25 @@ void setup()
 
   // LCD
   tft.begin();
+  tft.fillScreen(ILI9341_BLACK);
+
+  // Display logo
+  tft.drawRGBBitmap(
+      100,
+      100,
+#if defined(__AVR__)
+      logoBitmap,
+#else
+      // Some non-AVR MCU's have a "flat" memory model and don't
+      // distinguish between flash and RAM addresses.  In this case,
+      // the RAM-resident-optimized drawRGBBitmap in the ILI9341
+      // library can be invoked by forcibly type-converting the
+      // PROGMEM bitmap pointer to a non-const uint16_t *.
+      (uint16_t *)logoBitmap,
+#endif
+      LOGO_WIDTH, LOGO_HEIGHT);
+
+  delay(5000);
   tft.fillScreen(ILI9341_BLACK);
 }
 
@@ -153,24 +172,6 @@ void loop()
     digitalWrite(En, HIGH);
     delay(300000);
   }
-
-  // Display logo
-  tft.drawRGBBitmap(
-      100,
-      100,
-#if defined(__AVR__)
-      logoBitmap,
-#else
-      // Some non-AVR MCU's have a "flat" memory model and don't
-      // distinguish between flash and RAM addresses.  In this case,
-      // the RAM-resident-optimized drawRGBBitmap in the ILI9341
-      // library can be invoked by forcibly type-converting the
-      // PROGMEM bitmap pointer to a non-const uint16_t *.
-      (uint16_t *)logoBitmap,
-#endif
-      LOGO_WIDTH, LOGO_HEIGHT);
-
-  delay(1000);
 
   // Display pt100 temp
 
