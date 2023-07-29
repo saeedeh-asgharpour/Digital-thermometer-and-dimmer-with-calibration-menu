@@ -85,6 +85,60 @@ void setup()
 
   delay(5000);
   tft.fillScreen(ILI9341_BLACK);
+  
+  // Display pt100 temp
+
+  /* uint16_t rtd = thermo.readRTD();
+   tft.print("RTD value: ");
+   tft.println(rtd);
+   float ratio = rtd;
+   ratio /= 32768;
+   tft.print("Ratio = ");
+   tft.println(ratio, 8);
+   tft.print("Resistance = ");
+   tft.println(RREF*ratio, 8);*/
+  tft.setTextColor(ILI9341_WHITE);
+  tft.setTextSize(2);
+  tft.println("Temperature = ");
+  tft.setTextColor(ILI9341_WHITE);
+  tft.setTextSize(3);
+  tft.println(thermo.temperature(RNOMINAL, RREF));
+
+  // Check and print any faults
+  /*uint8_t fault = thermo.readFault();
+  if (fault)
+  {
+      tft.setTextColor(ILI9341_WHITE); tft.setTextSize(1);
+    tft.print("Fault 0x");
+    tft.println(fault, HEX);
+    if (fault & MAX31865_FAULT_HIGHTHRESH)
+    {
+      tft.println("RTD High Threshold");
+    }
+    if (fault & MAX31865_FAULT_LOWTHRESH)
+    {
+      tft.println("RTD Low Threshold");
+    }
+    if (fault & MAX31865_FAULT_REFINLOW)
+    {
+      tft.println("REFIN- > 0.85 x Bias");
+    }
+    if (fault & MAX31865_FAULT_REFINHIGH)
+    {
+      tft.println("REFIN- < 0.85 x Bias - FORCE- open");
+    }
+    if (fault & MAX31865_FAULT_RTDINLOW)
+    {
+      tft.println("RTDIN- < 0.85 x Bias - FORCE- open");
+    }
+    if (fault & MAX31865_FAULT_OVUV)
+    {
+      tft.println("Under/Over voltage");
+    }
+    thermo.clearFault();
+  }*/
+  tft.println();
+  delay(1000);    
 }
 
 // dimmer
@@ -173,57 +227,4 @@ void loop()
     delay(300000);
   }
 
-  // Display pt100 temp
-
-  /* uint16_t rtd = thermo.readRTD();
-   tft.print("RTD value: ");
-   tft.println(rtd);
-   float ratio = rtd;
-   ratio /= 32768;
-   tft.print("Ratio = ");
-   tft.println(ratio, 8);
-   tft.print("Resistance = ");
-   tft.println(RREF*ratio, 8);*/
-  tft.setTextColor(ILI9341_WHITE);
-  tft.setTextSize(2);
-  tft.println("Temperature = ");
-  tft.setTextColor(ILI9341_WHITE);
-  tft.setTextSize(3);
-  tft.println(thermo.temperature(RNOMINAL, RREF));
-
-  // Check and print any faults
-  /*uint8_t fault = thermo.readFault();
-  if (fault)
-  {
-      tft.setTextColor(ILI9341_WHITE); tft.setTextSize(1);
-    tft.print("Fault 0x");
-    tft.println(fault, HEX);
-    if (fault & MAX31865_FAULT_HIGHTHRESH)
-    {
-      tft.println("RTD High Threshold");
-    }
-    if (fault & MAX31865_FAULT_LOWTHRESH)
-    {
-      tft.println("RTD Low Threshold");
-    }
-    if (fault & MAX31865_FAULT_REFINLOW)
-    {
-      tft.println("REFIN- > 0.85 x Bias");
-    }
-    if (fault & MAX31865_FAULT_REFINHIGH)
-    {
-      tft.println("REFIN- < 0.85 x Bias - FORCE- open");
-    }
-    if (fault & MAX31865_FAULT_RTDINLOW)
-    {
-      tft.println("RTDIN- < 0.85 x Bias - FORCE- open");
-    }
-    if (fault & MAX31865_FAULT_OVUV)
-    {
-      tft.println("Under/Over voltage");
-    }
-    thermo.clearFault();
-  }*/
-  tft.println();
-  delay(1000);
 }
