@@ -15,6 +15,7 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 
 // dimmer
 volatile int i = 0;              // Variable to use as a counter of dimming steps. It is volatile since it is passed between interrupts
+volatile int j = 0;              // Variable to use as a counter of power level
 volatile boolean zero_cross = 0; // Flag to indicate we have crossed zero
 int AC_pin = 3;                  // Output to Opto Triac
 int buttonDown = A0;             // first button at pin A0
@@ -182,6 +183,9 @@ void loop()
     if (dim < 127)
     {
       dim = dim + pas;
+      j--;
+      tft.println(j);
+
       if (dim > 127)
       {
         dim = 128;
@@ -193,9 +197,14 @@ void loop()
     if (dim > 5)
     {
       dim = dim - pas;
+      j++;
+      tft.println(j);
+
       if (dim < 0)
       {
         dim = 0;
+        j = 100;
+        tft.println(j);
       }
     }
   }
@@ -220,9 +229,10 @@ void loop()
   {
     digitalWrite(En, LOW);
   }
-  
+
   if (RunButtonState == LOW)
-  {tft.println("cooling");
+  {
+    tft.println("cooling");
     dim = 128;
     delay(30000);
     digitalWrite(En, HIGH);
