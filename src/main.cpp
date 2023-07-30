@@ -83,9 +83,9 @@ void setup()
 #endif
       LOGO_WIDTH, LOGO_HEIGHT);
 
-  delay(5000);
+  delay(1000);
   tft.fillScreen(ILI9341_BLACK);
-  
+
   // Display pt100 temp
 
   /* uint16_t rtd = thermo.readRTD();
@@ -138,7 +138,7 @@ void setup()
     thermo.clearFault();
   }*/
   tft.println();
-  delay(1000);    
+  delay(1000);
 }
 
 // dimmer
@@ -220,11 +220,12 @@ void loop()
   {
     digitalWrite(En, LOW);
   }
-
+  
   if (RunButtonState == LOW)
-  {
+  {tft.println("cooling");
+    dim = 128;
+    delay(30000);
     digitalWrite(En, HIGH);
     delay(300000);
   }
-
 }
