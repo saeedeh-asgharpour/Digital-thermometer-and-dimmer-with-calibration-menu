@@ -183,11 +183,12 @@ void loop()
     if (dim < 127)
     {
       tft.fillScreen(ILI9341_BLACK);
-
       dim = dim + pas;
       j -= 10;
-      tft.setCursor(0, 75);
-      tft.println(j);
+      tft.setCursor(0, 90);
+      tft.print("power:");
+      tft.print(j);
+      tft.print("/110");
       if (dim > 127)
       {
         dim = 128;
@@ -201,8 +202,10 @@ void loop()
       tft.fillScreen(ILI9341_BLACK);
       dim = dim - pas;
       j += 10;
-      tft.setCursor(0, 75);
-      tft.println(j);
+      tft.setCursor(0, 90);
+      tft.print("power:");
+      tft.print(j);
+      tft.print("/110");
       if (dim < 0)
       {
         dim = 0;
