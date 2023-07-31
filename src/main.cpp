@@ -13,27 +13,27 @@
 #define TFT_CS 10
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 
-// dimmer
+// Dimmer
 volatile int i = 0;              // Variable to use as a counter of dimming steps. It is volatile since it is passed between interrupts
 volatile int j = 0;              // Variable to use as a counter of power level
 volatile boolean zero_cross = 0; // Flag to indicate we have crossed zero
 int AC_pin = 3;                  // Output to Opto Triac
-int buttonDown = A0;             // first button at pin A0
-int buttonUp = A1;               // second button at pin A1
-int dim2 = 0;                    // led control
+int buttonDown = A0;             // Down button at pin A0
+int buttonUp = A1;               // Up button at pin A1
+int dim2 = 0;                    // Heater control
 int dim = 128;                   // Dimming level (0-128)  0 = on, 128 = 0ff
-int pas = 11;                    // step for count;
+int pas = 11;                    // Step for count;
 int freqStep = 75;               // This is the delay-per-brightness step in microseconds. It allows for 128 steps
 
 void zero_cross_detect();
 void dim_check();
 
-// fan
+// Fan
 const int RunButton = 4;
 const int En = 7;
 int RunButtonState;
 
-// max31865
+// Max31865
 
 // Use software SPI: CS, DI, DO, CLK
 Adafruit_MAX31865 thermo = Adafruit_MAX31865(10, 11, 12, 13);
@@ -46,13 +46,13 @@ Adafruit_MAX31865 thermo = Adafruit_MAX31865(10, 11, 12, 13);
 
 void setup()
 {
-  // fan
+  // Fan
   pinMode(RunButton, INPUT);
   pinMode(En, OUTPUT);
 
-  // dimmer
-  pinMode(buttonDown, INPUT);                    // set buttonDown pin as input
-  pinMode(buttonUp, INPUT);                      // set buttonUp pin as input
+  // Dimmer
+  pinMode(buttonDown, INPUT);                    // Set buttonDown pin as input
+  pinMode(buttonUp, INPUT);                      // Set buttonUp pin as input
   pinMode(AC_pin, OUTPUT);                       // Set the Triac pin as output
   attachInterrupt(0, zero_cross_detect, RISING); // Attach an Interupt to Pin 2 (interupt 0) for Zero Cross Detection
   Timer1.initialize(freqStep);                   // Initialize TimerOne library for the freq we need
@@ -61,7 +61,7 @@ void setup()
   Serial.begin(9600);
   SPSR |= (1 << SPI2X); // 2x SPI speed
 
-  // max31865
+  // Max31865
   thermo.begin(MAX31865_4WIRE); // set to 2WIRE or 3WIRE as necessary
 
   // LCD
@@ -87,62 +87,12 @@ void setup()
   delay(1000);
   tft.fillScreen(ILI9341_BLACK);
 
-  // Display pt100 temp
+ 
 
-  /* uint16_t rtd = thermo.readRTD();
-   tft.print("RTD value: ");
-   tft.println(rtd);
-   float ratio = rtd;
-   ratio /= 32768;
-   tft.print("Ratio = ");
-   tft.println(ratio, 8);
-   tft.print("Resistance = ");
-   tft.println(RREF*ratio, 8);*/
-  tft.setTextColor(ILI9341_WHITE);
-  tft.setTextSize(2);
-  tft.println("Temperature = ");
-  tft.setTextColor(ILI9341_WHITE);
-  tft.setTextSize(3);
-  tft.println(thermo.temperature(RNOMINAL, RREF));
-
-  // Check and print any faults
-  /*uint8_t fault = thermo.readFault();
-  if (fault)
-  {
-      tft.setTextColor(ILI9341_WHITE); tft.setTextSize(1);
-    tft.print("Fault 0x");
-    tft.println(fault, HEX);
-    if (fault & MAX31865_FAULT_HIGHTHRESH)
-    {
-      tft.println("RTD High Threshold");
-    }
-    if (fault & MAX31865_FAULT_LOWTHRESH)
-    {
-      tft.println("RTD Low Threshold");
-    }
-    if (fault & MAX31865_FAULT_REFINLOW)
-    {
-      tft.println("REFIN- > 0.85 x Bias");
-    }
-    if (fault & MAX31865_FAULT_REFINHIGH)
-    {
-      tft.println("REFIN- < 0.85 x Bias - FORCE- open");
-    }
-    if (fault & MAX31865_FAULT_RTDINLOW)
-    {
-      tft.println("RTDIN- < 0.85 x Bias - FORCE- open");
-    }
-    if (fault & MAX31865_FAULT_OVUV)
-    {
-      tft.println("Under/Over voltage");
-    }
-    thermo.clearFault();
-  }*/
-  tft.println();
-  delay(1000);
 }
 
-// dimmer
+
+// Dimmer
 void zero_cross_detect()
 {
   zero_cross = true; // set flag for dim_check function that a zero cross has occured
@@ -161,20 +111,20 @@ void dim_check()
   {
     if (i >= dim)
     {
-      digitalWrite(AC_pin, HIGH); // turn on heater
-      i = 0;                      // reset time step counter
-      zero_cross = false;         // reset zero cross detection flag
+      digitalWrite(AC_pin, HIGH); // Turn on heater
+      i = 0;                      // Reset time step counter
+      zero_cross = false;         // Reset zero cross detection flag
     }
     else
     {
-      i++; // increment time step counter
+      i++; // Increment time step counter
     }
   }
 }
 
 void loop()
 {
-  // dimmer
+  // Dimmer
   digitalWrite(buttonDown, HIGH);
   digitalWrite(buttonUp, HIGH);
 
@@ -227,7 +177,7 @@ void loop()
     dim2 = 0;
   }
 
-  // fan
+  // Fan
   RunButtonState = digitalRead(RunButton);
   if (RunButtonState == HIGH)
   {
@@ -236,10 +186,67 @@ void loop()
 
   if (RunButtonState == LOW)
   {
+
     tft.println("cooling");
     dim = 128;
-    delay(30000);
+    delay(1000);
     digitalWrite(En, HIGH);
-    delay(300000);
+    delay(3000);
   }
+
+   // Display pt100 temp
+
+  /* uint16_t rtd = thermo.readRTD();
+   tft.print("RTD value: ");
+   tft.println(rtd);
+   float ratio = rtd;
+   ratio /= 32768;
+   tft.print("Ratio = ");
+   tft.println(ratio, 8);
+   tft.print("Resistance = ");
+   tft.println(RREF*ratio, 8);*/
+  tft.setCursor(0, 0);
+  tft.setTextColor(ILI9341_WHITE);
+  tft.setTextSize(2);
+  tft.println("Temperature = ");
+  tft.setTextColor(ILI9341_WHITE);
+  tft.setTextSize(3);
+  tft.println(thermo.temperature(RNOMINAL, RREF));
+
+  // Check and print any faults
+  /*uint8_t fault = thermo.readFault();
+  if (fault)
+  {
+      tft.setTextColor(ILI9341_WHITE); tft.setTextSize(1);
+    tft.print("Fault 0x");
+    tft.println(fault, HEX);
+    if (fault & MAX31865_FAULT_HIGHTHRESH)
+    {
+      tft.println("RTD High Threshold");
+    }
+    if (fault & MAX31865_FAULT_LOWTHRESH)
+    {
+      tft.println("RTD Low Threshold");
+    }
+    if (fault & MAX31865_FAULT_REFINLOW)
+    {
+      tft.println("REFIN- > 0.85 x Bias");
+    }
+    if (fault & MAX31865_FAULT_REFINHIGH)
+    {
+      tft.println("REFIN- < 0.85 x Bias - FORCE- open");
+    }
+    if (fault & MAX31865_FAULT_RTDINLOW)
+    {
+      tft.println("RTDIN- < 0.85 x Bias - FORCE- open");
+    }
+    if (fault & MAX31865_FAULT_OVUV)
+    {
+      tft.println("Under/Over voltage");
+    }
+    thermo.clearFault();
+  }*/
+  tft.println();
+  delay(1);
+
 }
