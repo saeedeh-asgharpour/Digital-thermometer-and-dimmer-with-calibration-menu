@@ -22,7 +22,7 @@ int buttonDown = A0;             // first button at pin A0
 int buttonUp = A1;               // second button at pin A1
 int dim2 = 0;                    // led control
 int dim = 128;                   // Dimming level (0-128)  0 = on, 128 = 0ff
-int pas = 8;                     // step for count;
+int pas = 11;                    // step for count;
 int freqStep = 75;               // This is the delay-per-brightness step in microseconds. It allows for 128 steps
 
 void zero_cross_detect();
@@ -182,10 +182,12 @@ void loop()
   {
     if (dim < 127)
     {
-      dim = dim + pas;
-      j--;
-      tft.println(j);
+      tft.fillScreen(ILI9341_BLACK);
 
+      dim = dim + pas;
+      j -= 10;
+      tft.setCursor(0, 75);
+      tft.println(j);
       if (dim > 127)
       {
         dim = 128;
@@ -194,17 +196,16 @@ void loop()
   }
   if (digitalRead(buttonUp) == LOW)
   {
-    if (dim > 5)
+    if (dim > 7)
     {
+      tft.fillScreen(ILI9341_BLACK);
       dim = dim - pas;
-      j++;
+      j += 10;
+      tft.setCursor(0, 75);
       tft.println(j);
-
       if (dim < 0)
       {
         dim = 0;
-        j = 100;
-        tft.println(j);
       }
     }
   }
