@@ -4,7 +4,6 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_ILI9341.h>
-#include <logo.h>
 #include <TimerOne.h>
 #include <Adafruit_MAX31865.h>
 
@@ -12,6 +11,10 @@
 #define TFT_DC 9
 #define TFT_CS 10
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
+
+// calibre
+const int setButton = A2; // set button at pin A2
+int setButtonState;
 
 // Dimmer
 volatile int i = 0;              // Variable to use as a counter of dimming steps. It is volatile since it is passed between interrupts
@@ -24,7 +27,6 @@ int dim2 = 0;                    // Heater control
 int dim = 128;                   // Dimming level (0-128)  0 = on, 128 = 0ff
 int pas = 11;                    // Step for count;
 int freqStep = 75;               // This is the delay-per-brightness step in microseconds. It allows for 128 steps
-
 void zero_cross_detect();
 void dim_check();
 
@@ -34,15 +36,9 @@ const int En = 7;
 int RunButtonState;
 
 // Max31865
-
-// Use software SPI: CS, DI, DO, CLK
 Adafruit_MAX31865 thermo = Adafruit_MAX31865(10, 11, 12, 13);
-
-// The value of the Rref resistor. Use 430.0 for PT100
-#define RREF 430.0
-
-// The 'nominal' 0-degrees-C resistance of the sensor, 100.0 for PT100
-#define RNOMINAL 100.0
+#define RREF 430.0     // The value of the Rref resistor. Use 430.0 for PT100
+#define RNOMINAL 100.0 // The 'nominal' 0-degrees-C resistance of the sensor, 100.0 for PT100
 
 void setup()
 {
@@ -69,7 +65,13 @@ void setup()
   tft.fillScreen(ILI9341_BLACK);
 
   // Display logo
-  tft.drawRGBBitmap(
+  tft.setRotation(45);
+  tft.setCursor(50, 50);
+  tft.setTextSize(3);
+  tft.println("aram gostar");
+  delay(1000);
+
+  /*tft.drawRGBBitmap(
       100,
       100,
 #if defined(__AVR__)
@@ -83,7 +85,7 @@ void setup()
       (uint16_t *)logoBitmap,
 #endif
       LOGO_WIDTH, LOGO_HEIGHT);
-  delay(5000);
+  delay(5000);*/
 
   // menu1
   tft.fillScreen(ILI9341_BLACK);
@@ -131,12 +133,10 @@ void loop()
   // Dimmer
   digitalWrite(buttonDown, HIGH);
   digitalWrite(buttonUp, HIGH);
-
   if (digitalRead(buttonDown) == LOW)
   {
     if (dim < 127)
     {
-
       tft.fillScreen(ILI9341_BLACK);
       dim = dim + pas;
       j -= 10;
@@ -159,7 +159,6 @@ void loop()
   {
     if (dim > 7)
     {
-
       tft.fillScreen(ILI9341_BLACK);
       dim = dim - pas;
       j += 10;
@@ -221,58 +220,45 @@ void loop()
     tft.setTextSize(2);
     tft.println("Stop");
   }
+
   // Display pt100 temp
-
-  /* uint16_t rtd = thermo.readRTD();
-   tft.print("RTD value: ");
-   tft.println(rtd);
-   float ratio = rtd;
-   ratio /= 32768;
-   tft.print("Ratio = ");
-   tft.println(ratio, 8);
-   tft.print("Resistance = ");
-   tft.println(RREF*ratio, 8);*/
-
   tft.setRotation(45);
   tft.setCursor(50, 70);
   tft.setTextColor(ILI9341_WHITE);
   tft.setTextSize(3);
   tft.print("Temp: ");
   tft.print(thermo.temperature(RNOMINAL, RREF));
+  tft.print(" c");
+  /* uint8_t fault = thermo.readFault();
+   if (fault)
+   {
+     tft.setTextColor(ILI9341_WHITE);
+     tft.setTextSize(1);
+     tft.print("Fault 0x");
+     tft.println(fault, HEX);
+     if (fault & MAX31865_FAULT_OVUV)
+     {
+       tft.println("Under/Over voltage");
+     }
+     thermo.clearFault();
+     tft.println();
+     delay(1);
+   }*/
 
-  // Check and print any faults
-  /*uint8_t fault = thermo.readFault();
-  if (fault)
-  {
-      tft.setTextColor(ILI9341_WHITE); tft.setTextSize(1);
-    tft.print("Fault 0x");
-    tft.println(fault, HEX);
-    if (fault & MAX31865_FAULT_HIGHTHRESH)
-    {
-      tft.println("RTD High Threshold");
-    }
-    if (fault & MAX31865_FAULT_LOWTHRESH)
-    {
-      tft.println("RTD Low Threshold");
-    }
-    if (fault & MAX31865_FAULT_REFINLOW)
-    {
-      tft.println("REFIN- > 0.85 x Bias");
-    }
-    if (fault & MAX31865_FAULT_REFINHIGH)
-    {
-      tft.println("REFIN- < 0.85 x Bias - FORCE- open");
-    }
-    if (fault & MAX31865_FAULT_RTDINLOW)
-    {
-      tft.println("RTDIN- < 0.85 x Bias - FORCE- open");
-    }
-    if (fault & MAX31865_FAULT_OVUV)
-    {
-      tft.println("Under/Over voltage");
-    }
-    thermo.clearFault();
-  }*/
-  tft.println();
-  delay(1);
+  // calibre
+ setButtonState = digitalRead(setButton);
+ if (setButtonState == LOW)
+ {
+   tft.fillScreen(ILI9341_BLACK);
+   tft.setCursor(60, 130);
+   tft.setTextSize(2);
+   tft.println("Temp Range: 0-400 c");
+   tft.setCursor(60, 160);
+   tft.setTextSize(2);
+   tft.println("offset: 0:0 c");
+   if (RunButtonState == LOW)
+   {
+     tft.println("run button");
+   }
+ }
 }
