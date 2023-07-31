@@ -86,11 +86,11 @@ void setup()
 
   delay(1000);
   tft.fillScreen(ILI9341_BLACK);
-
- 
-
+  tft.setCursor(0, 90);
+tft.setTextSize(2);
+  tft.println("power: 0");
+  tft.println("stop");
 }
-
 
 // Dimmer
 void zero_cross_detect()
@@ -132,6 +132,7 @@ void loop()
   {
     if (dim < 127)
     {
+
       tft.fillScreen(ILI9341_BLACK);
       dim = dim + pas;
       j -= 10;
@@ -139,6 +140,7 @@ void loop()
       tft.print("power:");
       tft.print(j);
       tft.print("/110");
+      tft.println("Run");
       if (dim > 127)
       {
         dim = 128;
@@ -149,6 +151,7 @@ void loop()
   {
     if (dim > 7)
     {
+
       tft.fillScreen(ILI9341_BLACK);
       dim = dim - pas;
       j += 10;
@@ -156,6 +159,8 @@ void loop()
       tft.print("power:");
       tft.print(j);
       tft.print("/110");
+      tft.println("Run");
+
       if (dim < 0)
       {
         dim = 0;
@@ -192,9 +197,12 @@ void loop()
     delay(1000);
     digitalWrite(En, HIGH);
     delay(3000);
+    tft.fillScreen(ILI9341_BLACK);
+    tft.println("power: 0/110");
+    tft.println("stop");
   }
 
-   // Display pt100 temp
+  // Display pt100 temp
 
   /* uint16_t rtd = thermo.readRTD();
    tft.print("RTD value: ");
@@ -248,5 +256,4 @@ void loop()
   }*/
   tft.println();
   delay(1);
-
 }
