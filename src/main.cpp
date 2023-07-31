@@ -83,13 +83,17 @@ void setup()
       (uint16_t *)logoBitmap,
 #endif
       LOGO_WIDTH, LOGO_HEIGHT);
+  delay(5000);
 
-  delay(1000);
+  // menu1
   tft.fillScreen(ILI9341_BLACK);
-  tft.setCursor(0, 90);
-tft.setTextSize(2);
-  tft.println("power: 0");
-  tft.println("stop");
+  tft.setRotation(45);
+  tft.setCursor(10, 10);
+  tft.setTextSize(2);
+  tft.println("Stop");
+  tft.setCursor(50, 170);
+  tft.setTextSize(3);
+  tft.println("Power: 0/110");
 }
 
 // Dimmer
@@ -136,10 +140,14 @@ void loop()
       tft.fillScreen(ILI9341_BLACK);
       dim = dim + pas;
       j -= 10;
-      tft.setCursor(0, 90);
-      tft.print("power:");
+      tft.setRotation(45);
+      tft.setCursor(50, 170);
+      tft.setTextSize(3);
+      tft.print("Power: ");
       tft.print(j);
-      tft.print("/110");
+      tft.println("/110");
+      tft.setCursor(10, 10);
+      tft.setTextSize(2);
       tft.println("Run");
       if (dim > 127)
       {
@@ -155,10 +163,14 @@ void loop()
       tft.fillScreen(ILI9341_BLACK);
       dim = dim - pas;
       j += 10;
-      tft.setCursor(0, 90);
-      tft.print("power:");
+      tft.setRotation(45);
+      tft.setCursor(50, 170);
+      tft.setTextSize(3);
+      tft.print("Power: ");
       tft.print(j);
-      tft.print("/110");
+      tft.println("/110");
+      tft.setCursor(10, 10);
+      tft.setTextSize(2);
       tft.println("Run");
 
       if (dim < 0)
@@ -191,17 +203,24 @@ void loop()
 
   if (RunButtonState == LOW)
   {
+    tft.setRotation(45);
+    tft.setCursor(10, 10);
+    tft.setTextSize(2);
+    tft.println("Cooling");
 
-    tft.println("cooling");
     dim = 128;
-    delay(1000);
+    delay(30000);
     digitalWrite(En, HIGH);
-    delay(3000);
-    tft.fillScreen(ILI9341_BLACK);
-    tft.println("power: 0/110");
-    tft.println("stop");
-  }
+    delay(300000);
 
+    tft.fillScreen(ILI9341_BLACK);
+    tft.setCursor(50, 170);
+    tft.setTextSize(3);
+    tft.println("Power: 0/110");
+    tft.setCursor(10, 10);
+    tft.setTextSize(2);
+    tft.println("Stop");
+  }
   // Display pt100 temp
 
   /* uint16_t rtd = thermo.readRTD();
@@ -213,13 +232,13 @@ void loop()
    tft.println(ratio, 8);
    tft.print("Resistance = ");
    tft.println(RREF*ratio, 8);*/
-  tft.setCursor(0, 0);
-  tft.setTextColor(ILI9341_WHITE);
-  tft.setTextSize(2);
-  tft.println("Temperature = ");
+
+  tft.setRotation(45);
+  tft.setCursor(50, 70);
   tft.setTextColor(ILI9341_WHITE);
   tft.setTextSize(3);
-  tft.println(thermo.temperature(RNOMINAL, RREF));
+  tft.print("Temp: ");
+  tft.print(thermo.temperature(RNOMINAL, RREF));
 
   // Check and print any faults
   /*uint8_t fault = thermo.readFault();
