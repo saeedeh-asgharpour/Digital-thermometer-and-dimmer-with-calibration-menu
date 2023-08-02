@@ -68,6 +68,7 @@ void setup()
   tft.setRotation(45);
   tft.setCursor(50, 50);
   tft.setTextSize(3);
+  tft.setTextColor(ILI9341_WHITE);
   tft.println("aram gostar");
   delay(1000);
 
@@ -92,6 +93,7 @@ void setup()
   tft.setRotation(45);
   tft.setCursor(10, 10);
   tft.setTextSize(2);
+  tft.setTextColor(ILI9341_WHITE);
   tft.println("Stop");
   tft.setCursor(50, 170);
   tft.setTextSize(3);
@@ -142,6 +144,7 @@ void loop()
       j -= 10;
       tft.setRotation(45);
       tft.setCursor(50, 170);
+      tft.setTextColor(ILI9341_WHITE);
       tft.setTextSize(3);
       tft.print("Power: ");
       tft.print(j);
@@ -164,6 +167,7 @@ void loop()
       j += 10;
       tft.setRotation(45);
       tft.setCursor(50, 170);
+      tft.setTextColor(ILI9341_WHITE);
       tft.setTextSize(3);
       tft.print("Power: ");
       tft.print(j);
@@ -193,8 +197,14 @@ void loop()
     dim2 = 0;
   }
 
-
   // Display pt100 temp
+
+  uint16_t rtd = thermo.readRTD();
+  // Serial.print("RTD value: "); Serial.println(rtd);
+  float ratio = rtd;
+  ratio /= 32768;
+  // Serial.print("Ratio = "); Serial.println(ratio,8);
+  // tft.print("Resistance = "); tft.println(RREF*ratio,8);
   tft.setRotation(45);
   tft.setCursor(50, 70);
   tft.setTextColor(ILI9341_WHITE);
@@ -202,23 +212,30 @@ void loop()
   tft.print("Temp: ");
   tft.print(thermo.temperature(RNOMINAL, RREF));
   tft.print(" c");
-  /* uint8_t fault = thermo.readFault();
-   if (fault)
-   {
-     tft.setTextColor(ILI9341_WHITE);
-     tft.setTextSize(1);
-     tft.print("Fault 0x");
-     tft.println(fault, HEX);
-     if (fault & MAX31865_FAULT_OVUV)
-     {
-       tft.println("Under/Over voltage");
-     }
-     thermo.clearFault();
-     tft.println();
-     delay(1);
-   }*/
 
-   // Fan
+  uint8_t fault = thermo.readFault();
+  if (fault)
+  {
+    tft.setCursor(60, 110);
+    tft.setTextSize(2);
+    tft.setTextColor(ILI9341_RED);
+    tft.print("Fault 0x");
+    tft.println(fault, HEX);
+    if (fault & MAX31865_FAULT_OVUV)
+    {
+      tft.setCursor(60, 130);
+      tft.setTextColor(ILI9341_RED);
+      tft.setTextSize(2);
+      tft.println("Under/Over voltage");
+    }
+    thermo.clearFault();
+    tft.println();
+    delay(1);
+  }
+  tft.println();
+  delay(50);
+
+  // Fan
   RunButtonState = digitalRead(RunButton);
   if (RunButtonState == HIGH)
   {
@@ -229,14 +246,38 @@ void loop()
   {
     tft.fillScreen(ILI9341_BLACK);
     tft.setRotation(45);
-     tft.setCursor(50, 70);
-  tft.setTextColor(ILI9341_WHITE);
-  tft.setTextSize(3);
-  tft.print("Temp: ");
-  tft.print(thermo.temperature(RNOMINAL, RREF));
-  tft.print(" c");
+    tft.setCursor(50, 70);
+    tft.setTextColor(ILI9341_WHITE);
+    tft.setTextSize(3);
+    tft.print("Temp: ");
+    tft.print(thermo.temperature(RNOMINAL, RREF));
+    tft.print(" c");
+
+    uint8_t fault = thermo.readFault();
+    if (fault)
+    {
+      tft.setCursor(60, 110);
+      tft.setTextSize(2);
+      tft.setTextColor(ILI9341_RED);
+      tft.print("Fault 0x");
+      tft.println(fault, HEX);
+      if (fault & MAX31865_FAULT_OVUV)
+      {
+        tft.setCursor(60, 130);
+        tft.setTextColor(ILI9341_RED);
+        tft.setTextSize(2);
+        tft.println("Under/Over voltage");
+      }
+      thermo.clearFault();
+      tft.println();
+      delay(1);
+    }
+    tft.println();
+    delay(50);
+
     tft.setCursor(50, 170);
     tft.setTextSize(3);
+    tft.setTextColor(ILI9341_WHITE);
     tft.println("Power: 0/110");
     tft.setCursor(10, 10);
     tft.setTextSize(2);
@@ -250,28 +291,32 @@ void loop()
     tft.fillScreen(ILI9341_BLACK);
     tft.setCursor(50, 170);
     tft.setTextSize(3);
+    tft.setTextColor(ILI9341_WHITE);
+
     tft.println("Power: 0/110");
     tft.setCursor(10, 10);
     tft.setTextSize(2);
     tft.println("Stop");
   }
 
-  
   // calibre
- setButtonState = digitalRead(setButton);
- if (setButtonState == LOW)
- {
-   tft.fillScreen(ILI9341_BLACK);
-   tft.setCursor(60, 130);
-   tft.setTextSize(2);
-   tft.println("Temp Range: 0-400 c");
-   tft.setCursor(60, 160);
-   tft.setTextSize(2);
-   tft.println("offset: 0:0 c");
-   if (RunButtonState == LOW)
-   {
-     tft.println("run button");
-   }
- }
+  setButtonState = digitalRead(setButton);
+  if (setButtonState == LOW)
+  {
+    tft.fillScreen(ILI9341_BLACK);
+    tft.setCursor(60, 160);
+    tft.setTextSize(2);
+    tft.setTextColor(ILI9341_WHITE);
 
+    tft.println("Temp Range: 0-400 c");
+    tft.setCursor(60, 190);
+    tft.setTextSize(2);
+    tft.println("offset: 0:0 c");
+    if (RunButtonState == LOW)
+    {
+      tft.setTextColor(ILI9341_WHITE);
+
+      tft.println("run button");
+    }
+  }
 }
