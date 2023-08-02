@@ -193,33 +193,6 @@ void loop()
     dim2 = 0;
   }
 
-  // Fan
-  RunButtonState = digitalRead(RunButton);
-  if (RunButtonState == HIGH)
-  {
-    digitalWrite(En, LOW);
-  }
-
-  if (RunButtonState == LOW)
-  {
-    tft.setRotation(45);
-    tft.setCursor(10, 10);
-    tft.setTextSize(2);
-    tft.println("Cooling");
-
-    dim = 128;
-    delay(30000);
-    digitalWrite(En, HIGH);
-    delay(300000);
-
-    tft.fillScreen(ILI9341_BLACK);
-    tft.setCursor(50, 170);
-    tft.setTextSize(3);
-    tft.println("Power: 0/110");
-    tft.setCursor(10, 10);
-    tft.setTextSize(2);
-    tft.println("Stop");
-  }
 
   // Display pt100 temp
   tft.setRotation(45);
@@ -245,6 +218,45 @@ void loop()
      delay(1);
    }*/
 
+   // Fan
+  RunButtonState = digitalRead(RunButton);
+  if (RunButtonState == HIGH)
+  {
+    digitalWrite(En, LOW);
+  }
+
+  if (RunButtonState == LOW)
+  {
+    tft.fillScreen(ILI9341_BLACK);
+    tft.setRotation(45);
+     tft.setCursor(50, 70);
+  tft.setTextColor(ILI9341_WHITE);
+  tft.setTextSize(3);
+  tft.print("Temp: ");
+  tft.print(thermo.temperature(RNOMINAL, RREF));
+  tft.print(" c");
+    tft.setCursor(50, 170);
+    tft.setTextSize(3);
+    tft.println("Power: 0/110");
+    tft.setCursor(10, 10);
+    tft.setTextSize(2);
+    tft.println("Cooling");
+
+    dim = 128;
+    delay(30000);
+    digitalWrite(En, HIGH);
+    delay(300000);
+
+    tft.fillScreen(ILI9341_BLACK);
+    tft.setCursor(50, 170);
+    tft.setTextSize(3);
+    tft.println("Power: 0/110");
+    tft.setCursor(10, 10);
+    tft.setTextSize(2);
+    tft.println("Stop");
+  }
+
+  
   // calibre
  setButtonState = digitalRead(setButton);
  if (setButtonState == LOW)
@@ -261,4 +273,5 @@ void loop()
      tft.println("run button");
    }
  }
+
 }
