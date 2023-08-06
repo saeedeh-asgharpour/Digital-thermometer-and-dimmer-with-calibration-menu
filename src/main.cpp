@@ -24,13 +24,8 @@ volatile float w = 0.0;
 bool dahgan = false;
 bool yekan = true;
 
-unsigned long lastDebounceTime = 0; // the last time the output pin was toggled
-unsigned long debounceDelay = 5000; // the debounce time; increase if the output flickers
-
-// the following variables are unsigned longs because the time, measured in
-// milliseconds, will quickly become a bigger number than can be stored in an int.
-// unsigned long lastDebounceTime = 0; // the last time the output pin was toggled
-// unsigned long debounceDelay = 50;   // the debounce time; increase if the output flickers
+volatile int tempRange = 0;
+volatile int h = 0;
 
 // Dimmer
 volatile int i = 0;              // Variable to use as a counter of dimming steps. It is volatile since it is passed between interrupts
@@ -149,27 +144,26 @@ void dim_check()
 void loop()
 {
 
-  digitalWrite(RunButton, HIGH);
-  if (digitalRead(RunButton) == LOW)
-  {
-    tft.fillScreen(ILI9341_BLACK);
-    set = false;
-    powerchange = true;
-    tft.setRotation(45);
-    tft.setCursor(50, 170);
-    tft.setTextColor(ILI9341_WHITE);
-    tft.setTextSize(3);
-    tft.print("Power: ");
-    tft.print(j);
-    tft.println("/110");
-    tft.setCursor(10, 10);
-    tft.setTextSize(2);
-    tft.println("Run");
-  }
-
   // Dimmer
   if (powerchange)
   {
+    digitalWrite(RunButton, HIGH);
+    if (digitalRead(RunButton) == LOW)
+    {
+      tft.fillScreen(ILI9341_BLACK);
+      set = false;
+      powerchange = true;
+      tft.setRotation(45);
+      tft.setCursor(50, 170);
+      tft.setTextColor(ILI9341_WHITE);
+      tft.setTextSize(3);
+      tft.print("Power: ");
+      tft.print(j);
+      tft.println("/110");
+      tft.setCursor(10, 10);
+      tft.setTextSize(2);
+      tft.println("Run");
+    }
     digitalWrite(buttonUp, HIGH);
     digitalWrite(buttonDown, HIGH);
 
@@ -240,8 +234,19 @@ void loop()
     tft.setTextSize(3);
     tft.print("Temp: ");
     float temp = thermo.temperature(RNOMINAL, RREF);
-    tft.print(temp + offset);
-    tft.print(" c");
+
+    if (temp > tempRange)
+    {
+
+      tft.print(temp + offset);
+      tft.print(" c");
+    }
+
+    else
+    {
+      tft.print(temp);
+      tft.print(" c");
+    }
 
     uint8_t fault = thermo.readFault();
     if (fault)
@@ -312,12 +317,28 @@ void loop()
 
   if (set)
   {
-    tft.setCursor(60, 80);
+    tft.setCursor(50, 80);
     tft.setTextSize(2);
     tft.setTextColor(ILI9341_WHITE);
-    tft.println("Temp Range: 0-400 c");
+    tft.println("Temp Range:");
     tft.setCursor(60, 130);
     tft.println("Offset: ");
+
+    digitalWrite(RunButton, HIGH);
+    if (digitalRead(RunButton) == LOW)
+    {
+      tft.fillScreen(ILI9341_BLACK);
+      tft.setCursor(50, 80);
+      tft.setTextSize(2);
+      tft.setTextColor(ILI9341_WHITE);
+      tft.println("Temp Range: ");
+      h += 5;
+      tft.setCursor(184, 80);
+      tft.setTextColor(ILI9341_GREEN);
+      tft.print(h);
+      tft.print("-to above");
+    }
+
     if (yekan)
     {
       // up
@@ -325,7 +346,7 @@ void loop()
       if (digitalRead(buttonUp) == LOW)
       {
         tft.fillScreen(ILI9341_BLACK);
-        tft.setCursor(60, 80);
+        tft.setCursor(50, 80);
         tft.setTextSize(2);
         tft.setTextColor(ILI9341_WHITE);
         tft.println("Temp Range: 0-400 c");
@@ -334,7 +355,6 @@ void loop()
 
         m++;
 
-        tft.setTextSize(2);
         tft.setCursor(150, 130);
         tft.setTextColor(ILI9341_GREEN);
         tft.print(m);
@@ -348,7 +368,7 @@ void loop()
       if (digitalRead(buttonDown) == LOW)
       {
         tft.fillScreen(ILI9341_BLACK);
-        tft.setCursor(60, 80);
+        tft.setCursor(50, 80);
         tft.setTextSize(2);
         tft.setTextColor(ILI9341_WHITE);
         tft.println("Temp Range: 0-400 c");
@@ -367,8 +387,8 @@ void loop()
     }
 
     digitalWrite(setButton, HIGH);
-    int setState = digitalRead(setButton);
-    if (setState == LOW)
+
+    if (digitalRead(setButton) == LOW)
     {
       v = m;
       dahgan = true;
@@ -381,7 +401,7 @@ void loop()
       if (digitalRead(buttonUp) == LOW)
       {
         tft.fillScreen(ILI9341_BLACK);
-        tft.setCursor(60, 80);
+        tft.setCursor(50, 80);
         tft.setTextSize(2);
         tft.setTextColor(ILI9341_WHITE);
         tft.println("Temp Range: 0-400 c");
@@ -403,7 +423,7 @@ void loop()
       if (digitalRead(buttonDown) == LOW)
       {
         tft.fillScreen(ILI9341_BLACK);
-        tft.setCursor(60, 80);
+        tft.setCursor(50, 80);
         tft.setTextSize(2);
         tft.setTextColor(ILI9341_WHITE);
         tft.println("Temp Range: 0-400 c");
@@ -422,20 +442,15 @@ void loop()
       }
 
       digitalWrite(setButton, HIGH);
-      if (setState == LOW)
+      if (digitalRead(setButton) == LOW)
       {
         w = n;
-        offset = v + w/10;
+        offset = v + w / 10;
+        tempRange = h;
+
+        /*powerchange=true;
+        set=false;*/
       }
     }
-
-    /*// reset to menu 1
-     digitalWrite(setButton, HIGH);
-    int reading = digitalRead(setButton);
-    if (reading != lastButtonState)
-    {
-      // reset the debouncing timer
-      lastDebounceTime = millis();
-    }*/
   }
 }
