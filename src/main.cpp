@@ -326,7 +326,6 @@ void loop()
 
   if (set)
   {
-
     tft.setCursor(50, 80);
     tft.setTextSize(2);
     tft.setTextColor(ILI9341_WHITE);
@@ -359,7 +358,10 @@ void loop()
         tft.setCursor(50, 80);
         tft.setTextSize(2);
         tft.setTextColor(ILI9341_WHITE);
-        tft.println("Temp Range: 0-400 c");
+        tft.println("Temp Range:");
+        tft.setCursor(184, 80);
+        tft.print(h);
+        tft.print("-to above");
         tft.setCursor(60, 130);
         tft.println("Offset: ");
 
@@ -369,7 +371,8 @@ void loop()
         tft.setTextColor(ILI9341_GREEN);
         tft.print(m);
         tft.setTextColor(ILI9341_WHITE);
-        tft.print(":0");
+        tft.print(":");
+        tft.print(n);
       }
 
       // down
@@ -381,7 +384,10 @@ void loop()
         tft.setCursor(50, 80);
         tft.setTextSize(2);
         tft.setTextColor(ILI9341_WHITE);
-        tft.println("Temp Range: 0-400 c");
+        tft.println("Temp Range:");
+        tft.setCursor(184, 80);
+        tft.print(h);
+        tft.print("-to above");
         tft.setCursor(60, 130);
         tft.println("Offset: ");
 
@@ -392,7 +398,8 @@ void loop()
         tft.setTextColor(ILI9341_GREEN);
         tft.print(m);
         tft.setTextColor(ILI9341_WHITE);
-        tft.print(":0");
+        tft.print(":");
+        tft.print(n);
       }
     }
 
@@ -405,7 +412,10 @@ void loop()
         tft.setCursor(50, 80);
         tft.setTextSize(2);
         tft.setTextColor(ILI9341_WHITE);
-        tft.println("Temp Range: 0-400 c");
+        tft.println("Temp Range:");
+        tft.setCursor(184, 80);
+        tft.print(h);
+        tft.print("-to above");
         tft.setCursor(60, 130);
         tft.println("Offset: ");
         tft.setTextSize(2);
@@ -427,23 +437,36 @@ void loop()
         tft.setCursor(50, 80);
         tft.setTextSize(2);
         tft.setTextColor(ILI9341_WHITE);
-        tft.println("Temp Range: 0-400 c");
+        tft.println("Temp Range:");
+        tft.setCursor(184, 80);
+        tft.print(h);
+        tft.print("-to above");
         tft.setCursor(60, 130);
         tft.println("Offset: ");
         tft.setTextSize(2);
         tft.setCursor(150, 130);
         tft.print(v);
-
-        n--;
+        if (n > 0)
+        {
+          n--;
+        }
 
         tft.setCursor(165, 130);
         tft.print(":");
         tft.setTextColor(ILI9341_GREEN);
         tft.print(n);
       }
-      w = n;
-      offset = v + w / 10;
       tempRange = h;
+      w = n;
+      if (v < 0)
+      {
+
+        offset = v - w / 10;
+      }
+      else
+      {
+        offset = v + w / 10;
+      }
     }
 
     buttonState = digitalRead(setButton);
@@ -490,7 +513,11 @@ void loop()
         w = 0.0;
         powerchange = true;
         set = false;
+        yekan=true;
         // menu1
+        tft.setCursor(60, 40);
+        tft.setTextColor(ILI9341_YELLOW);
+        tft.println("Reset to default");
         tft.fillScreen(ILI9341_BLACK);
         tft.setRotation(45);
         tft.setCursor(10, 10);
