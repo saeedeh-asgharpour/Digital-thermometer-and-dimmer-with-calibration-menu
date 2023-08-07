@@ -6,6 +6,7 @@
 #include <Adafruit_ILI9341.h>
 #include <TimerOne.h>
 #include <Adafruit_MAX31865.h>
+#include "logo.h"
 // change detect
 int buttonPushCounter = 0; // counter for the number of button presses
 int buttonState = 0;       // current state of the button
@@ -20,7 +21,7 @@ bool bCheckingSwitch = false;
 #define TFT_CS 10
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 
-// calibre
+// calibration
 const int setButton = A2; // set button at pin A2
 volatile float offset = 0.0;
 bool set = false;
@@ -58,6 +59,28 @@ Adafruit_MAX31865 thermo = Adafruit_MAX31865(10, 11, 12, 13);
 #define RREF 430.0     // The value of the Rref resistor. Use 430.0 for PT100
 #define RNOMINAL 100.0 // The 'nominal' 0-degrees-C resistance of the sensor, 100.0 for PT100
 
+void menu1()
+{
+  tft.fillScreen(ILI9341_BLACK);
+  tft.setRotation(45);
+  tft.setCursor(10, 10);
+  tft.setTextSize(2);
+  tft.setTextColor(ILI9341_WHITE);
+  tft.println("Stop");
+  tft.setCursor(50, 170);
+  tft.setTextSize(3);
+  tft.println("Power: 0/110");
+}
+void menu2()
+{
+  tft.fillScreen(ILI9341_BLACK);
+  tft.setCursor(50, 80);
+  tft.setTextSize(2);
+  tft.setTextColor(ILI9341_WHITE);
+  tft.println("Temp Range:");
+  tft.setCursor(184, 80);
+}
+
 void setup()
 {
 
@@ -84,16 +107,10 @@ void setup()
   tft.fillScreen(ILI9341_BLACK);
 
   // Display logo
-  /*tft.setRotation(45);
-  tft.setCursor(50, 50);
-  tft.setTextSize(3);
-  tft.setTextColor(ILI9341_WHITE);
-  tft.println("aram gostar");
-  delay(1000);*/
-
-  /*tft.drawRGBBitmap(
-      100,
-      100,
+  tft.setRotation(45);
+  tft.drawRGBBitmap(
+      120,
+      80,
 #if defined(__AVR__)
       logoBitmap,
 #else
@@ -105,18 +122,10 @@ void setup()
       (uint16_t *)logoBitmap,
 #endif
       LOGO_WIDTH, LOGO_HEIGHT);
-  delay(5000);*/
+  delay(5000);
 
   // menu1
-  tft.fillScreen(ILI9341_BLACK);
-  tft.setRotation(45);
-  tft.setCursor(10, 10);
-  tft.setTextSize(2);
-  tft.setTextColor(ILI9341_WHITE);
-  tft.println("Stop");
-  tft.setCursor(50, 170);
-  tft.setTextSize(3);
-  tft.println("Power: 0/110");
+  menu1();
 }
 
 // Dimmer
@@ -299,9 +308,9 @@ void loop()
       tft.println("Cooling");
 
       dim = 128;
-      delay(1000);
+      delay(30000); //fan will start after 30sec
       digitalWrite(En, HIGH);
-      delay(3000);
+      delay(300000); // fan will working for 5min
 
       tft.fillScreen(ILI9341_BLACK);
       tft.setCursor(50, 170);
@@ -354,12 +363,7 @@ void loop()
       digitalWrite(buttonUp, HIGH);
       if (digitalRead(buttonUp) == LOW)
       {
-        tft.fillScreen(ILI9341_BLACK);
-        tft.setCursor(50, 80);
-        tft.setTextSize(2);
-        tft.setTextColor(ILI9341_WHITE);
-        tft.println("Temp Range:");
-        tft.setCursor(184, 80);
+        menu2();
         tft.print(h);
         tft.print("-to above");
         tft.setCursor(60, 130);
@@ -371,7 +375,7 @@ void loop()
         tft.setTextColor(ILI9341_GREEN);
         tft.print(m);
         tft.setTextColor(ILI9341_WHITE);
-        tft.print(":");
+        tft.print(" :");
         tft.print(n);
       }
 
@@ -380,12 +384,7 @@ void loop()
       digitalWrite(buttonDown, HIGH);
       if (digitalRead(buttonDown) == LOW)
       {
-        tft.fillScreen(ILI9341_BLACK);
-        tft.setCursor(50, 80);
-        tft.setTextSize(2);
-        tft.setTextColor(ILI9341_WHITE);
-        tft.println("Temp Range:");
-        tft.setCursor(184, 80);
+        menu2();
         tft.print(h);
         tft.print("-to above");
         tft.setCursor(60, 130);
@@ -398,7 +397,7 @@ void loop()
         tft.setTextColor(ILI9341_GREEN);
         tft.print(m);
         tft.setTextColor(ILI9341_WHITE);
-        tft.print(":");
+        tft.print(" :");
         tft.print(n);
       }
     }
@@ -408,12 +407,7 @@ void loop()
       digitalWrite(buttonUp, HIGH);
       if (digitalRead(buttonUp) == LOW)
       {
-        tft.fillScreen(ILI9341_BLACK);
-        tft.setCursor(50, 80);
-        tft.setTextSize(2);
-        tft.setTextColor(ILI9341_WHITE);
-        tft.println("Temp Range:");
-        tft.setCursor(184, 80);
+        menu2();
         tft.print(h);
         tft.print("-to above");
         tft.setCursor(60, 130);
@@ -425,7 +419,7 @@ void loop()
         n++;
 
         tft.setCursor(165, 130);
-        tft.print(":");
+        tft.print(" :");
         tft.setTextColor(ILI9341_GREEN);
         tft.print(n);
       }
@@ -433,12 +427,7 @@ void loop()
       digitalWrite(buttonDown, HIGH);
       if (digitalRead(buttonDown) == LOW)
       {
-        tft.fillScreen(ILI9341_BLACK);
-        tft.setCursor(50, 80);
-        tft.setTextSize(2);
-        tft.setTextColor(ILI9341_WHITE);
-        tft.println("Temp Range:");
-        tft.setCursor(184, 80);
+        menu2();
         tft.print(h);
         tft.print("-to above");
         tft.setCursor(60, 130);
@@ -452,7 +441,7 @@ void loop()
         }
 
         tft.setCursor(165, 130);
-        tft.print(":");
+        tft.print(" :");
         tft.setTextColor(ILI9341_GREEN);
         tft.print(n);
       }
@@ -482,29 +471,26 @@ void loop()
       // if low now, the change was unpressed to pressed
       if (buttonState == LOW)
       {
-        // in that case, get the time now to start the
-        // 5-sec delay...
+        //  get the time now to start the
+        // 5-sec delay
         timeStart = millis();
-        //...indicate we're now timing a press...
+        //indicate we're now timing a press...
         bCheckingSwitch = true;
-
-      } // if
+      }
       else
       {
 
         bCheckingSwitch = false;
+      }
 
-      } // else
-
-      // and save the
       lastButtonState = buttonState;
     }
-    // 5 sec push to reset
 
     if (bCheckingSwitch)
     {
 
-      if ((millis() - timeStart) >= 2000)
+      if ((millis() - timeStart) >= 5000)     // 5sec push button to reset
+
       {
         offset = 0.0;
         n = 0;
@@ -513,22 +499,14 @@ void loop()
         w = 0.0;
         powerchange = true;
         set = false;
-        yekan=true;
+        yekan = true;
         // menu1
         tft.setCursor(60, 40);
         tft.setTextColor(ILI9341_YELLOW);
         tft.println("Reset to default");
-        tft.fillScreen(ILI9341_BLACK);
-        tft.setRotation(45);
-        tft.setCursor(10, 10);
-        tft.setTextSize(2);
-        tft.setTextColor(ILI9341_WHITE);
-        tft.println("Stop");
-        tft.setCursor(50, 170);
-        tft.setTextSize(3);
-        tft.println("Power: 0/110");
+        menu1();
       }
-    } // if
+    }
 
     lastButtonState = buttonState;
 
@@ -547,14 +525,7 @@ void loop()
       set = false;
       buttonPushCounter = 0;
       tft.fillScreen(ILI9341_BLACK);
-      tft.setRotation(45);
-      tft.setCursor(10, 10);
-      tft.setTextSize(2);
-      tft.setTextColor(ILI9341_WHITE);
-      tft.println("Stop");
-      tft.setCursor(50, 170);
-      tft.setTextSize(3);
-      tft.println("Power: 0/110");
+      menu1();
       break;
     }
   }
