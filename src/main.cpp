@@ -6,6 +6,14 @@
 #include <Adafruit_ILI9341.h>
 #include <TimerOne.h>
 #include <Adafruit_MAX31865.h>
+// change detect
+int buttonPushCounter = 0; // counter for the number of button presses
+int buttonState = 0;       // current state of the button
+int lastButtonState = 0;   // previous state of the button
+
+// reset
+unsigned long timeStart;
+bool bCheckingSwitch = false;
 
 // LCD
 #define TFT_DC 9
@@ -16,7 +24,6 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 const int setButton = A2; // set button at pin A2
 volatile float offset = 0.0;
 bool set = false;
-
 volatile int m = 0;
 volatile int v = 0;
 volatile int n = 0;
@@ -53,6 +60,7 @@ Adafruit_MAX31865 thermo = Adafruit_MAX31865(10, 11, 12, 13);
 
 void setup()
 {
+
   // Fan
   pinMode(RunButton, INPUT);
   pinMode(En, OUTPUT);
@@ -147,6 +155,7 @@ void loop()
   // Dimmer
   if (powerchange)
   {
+
     digitalWrite(RunButton, HIGH);
     if (digitalRead(RunButton) == LOW)
     {
@@ -317,6 +326,7 @@ void loop()
 
   if (set)
   {
+
     tft.setCursor(50, 80);
     tft.setTextSize(2);
     tft.setTextColor(ILI9341_WHITE);
@@ -386,15 +396,6 @@ void loop()
       }
     }
 
-    digitalWrite(setButton, HIGH);
-
-    if (digitalRead(setButton) == LOW)
-    {
-      v = m;
-      dahgan = true;
-      yekan = false;
-    }
-
     if (dahgan)
     {
       digitalWrite(buttonUp, HIGH);
@@ -440,17 +441,94 @@ void loop()
         tft.setTextColor(ILI9341_GREEN);
         tft.print(n);
       }
+      w = n;
+      offset = v + w / 10;
+      tempRange = h;
+    }
 
-      digitalWrite(setButton, HIGH);
-      if (digitalRead(setButton) == LOW)
+    buttonState = digitalRead(setButton);
+    if (buttonState != lastButtonState)
+    {
+
+      if (buttonState == HIGH)
       {
-        w = n;
-        offset = v + w / 10;
-        tempRange = h;
 
-        /*powerchange=true;
-        set=false;*/
+        buttonPushCounter++;
       }
+
+      // if low now, the change was unpressed to pressed
+      if (buttonState == LOW)
+      {
+        // in that case, get the time now to start the
+        // 5-sec delay...
+        timeStart = millis();
+        //...indicate we're now timing a press...
+        bCheckingSwitch = true;
+
+      } // if
+      else
+      {
+
+        bCheckingSwitch = false;
+
+      } // else
+
+      // and save the
+      lastButtonState = buttonState;
+    }
+    // 5 sec push to reset
+
+    if (bCheckingSwitch)
+    {
+
+      if ((millis() - timeStart) >= 2000)
+      {
+        offset = 0.0;
+        n = 0;
+        m = 0;
+        v = 0;
+        w = 0.0;
+        powerchange = true;
+        set = false;
+        // menu1
+        tft.fillScreen(ILI9341_BLACK);
+        tft.setRotation(45);
+        tft.setCursor(10, 10);
+        tft.setTextSize(2);
+        tft.setTextColor(ILI9341_WHITE);
+        tft.println("Stop");
+        tft.setCursor(50, 170);
+        tft.setTextSize(3);
+        tft.println("Power: 0/110");
+      }
+    } // if
+
+    lastButtonState = buttonState;
+
+    switch (buttonPushCounter)
+    {
+    case 2:
+
+      v = m;
+      yekan = false;
+      dahgan = true;
+      break;
+
+    case 3:
+
+      powerchange = true;
+      set = false;
+      buttonPushCounter = 0;
+      tft.fillScreen(ILI9341_BLACK);
+      tft.setRotation(45);
+      tft.setCursor(10, 10);
+      tft.setTextSize(2);
+      tft.setTextColor(ILI9341_WHITE);
+      tft.println("Stop");
+      tft.setCursor(50, 170);
+      tft.setTextSize(3);
+      tft.println("Power: 0/110");
+      break;
     }
   }
 }
